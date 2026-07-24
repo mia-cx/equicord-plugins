@@ -9,6 +9,9 @@ It ships with these replacements:
 | --- | --- |
 | `x.com` | `fixupx.com` |
 | `instagram.com` | `hhinstagram.com` |
+| `reddit.com` | `rxddit.com` |
+| `bsky.app` | `fxbsky.app` |
+| `twitter.com` | `fxtwitter.com` |
 
 Paths, query parameters, and fragments are preserved. Replacements only match
 the exact configured hostname, so `x.com` does not accidentally match

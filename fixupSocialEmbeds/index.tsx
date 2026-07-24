@@ -9,7 +9,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Paragraph } from "@components/Paragraph";
 import definePlugin, { OptionType } from "@utils/types";
-import { TextInput } from "@webpack/common";
+import { TextInput, useState } from "@webpack/common";
 
 interface HostReplacement {
     inputHost: string;
@@ -18,7 +18,10 @@ interface HostReplacement {
 
 const DEFAULT_REPLACEMENTS: HostReplacement[] = [
     { inputHost: "x.com", outputHost: "fixupx.com" },
-    { inputHost: "instagram.com", outputHost: "hhinstagram.com" }
+    { inputHost: "instagram.com", outputHost: "hhinstagram.com" },
+    { inputHost: "reddit.com", outputHost: "rxddit.com" },
+    { inputHost: "bsky.app", outputHost: "fxbsky.app" },
+    { inputHost: "twitter.com", outputHost: "fxtwitter.com" }
 ];
 
 const URL_REGEX = /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/gi;
@@ -61,17 +64,13 @@ export function replaceSocialHosts(content: string, replacements: HostReplacemen
 }
 
 function HostReplacementSettings() {
-    const { hostReplacements } = settings.use(["hostReplacements"]);
+    const [hostReplacements, setHostReplacements] = useState<HostReplacement[]>(
+        () => settings.store.hostReplacements
+    );
 
-    const update = (index: number, key: keyof HostReplacement, value: string) => {
-        const next = hostReplacements.map((rule, ruleIndex) =>
-            ruleIndex === index ? { ...rule, [key]: value } : rule
-        );
+    const update = (next: HostReplacement[]) => {
+        setHostReplacements(next);
         settings.store.hostReplacements = next;
-    };
-
-    const remove = (index: number) => {
-        settings.store.hostReplacements = hostReplacements.filter((_, ruleIndex) => ruleIndex !== index);
     };
 
     return (
@@ -96,19 +95,23 @@ function HostReplacementSettings() {
                         placeholder="x.com"
                         aria-label={`Input host ${index + 1}`}
                         spellCheck={false}
-                        onChange={value => update(index, "inputHost", value)}
+                        onChange={value => update(hostReplacements.map((currentRule, ruleIndex) =>
+                            ruleIndex === index ? { ...currentRule, inputHost: value } : currentRule
+                        ))}
                     />
                     <TextInput
                         value={rule.outputHost}
                         placeholder="fixupx.com"
                         aria-label={`Output host ${index + 1}`}
                         spellCheck={false}
-                        onChange={value => update(index, "outputHost", value)}
+                        onChange={value => update(hostReplacements.map((currentRule, ruleIndex) =>
+                            ruleIndex === index ? { ...currentRule, outputHost: value } : currentRule
+                        ))}
                     />
                     <Button
                         variant="dangerPrimary"
                         size="small"
-                        onClick={() => remove(index)}
+                        onClick={() => update(hostReplacements.filter((_, ruleIndex) => ruleIndex !== index))}
                     >
                         Remove
                     </Button>
@@ -121,12 +124,10 @@ function HostReplacementSettings() {
 
             <Button
                 size="small"
-                onClick={() => {
-                    settings.store.hostReplacements = [
-                        ...hostReplacements,
-                        { inputHost: "", outputHost: "" }
-                    ];
-                }}
+                onClick={() => update([
+                    ...hostReplacements,
+                    { inputHost: "", outputHost: "" }
+                ])}
             >
                 Add replacement
             </Button>
@@ -135,15 +136,11 @@ function HostReplacementSettings() {
 }
 
 const settings = definePluginSettings({
-    replacements: {
+    hostReplacements: {
         type: OptionType.COMPONENT,
         description: "Configure URL host replacements.",
+        default: DEFAULT_REPLACEMENTS,
         component: HostReplacementSettings
-    },
-    hostReplacements: {
-        type: OptionType.CUSTOM,
-        description: "The input and output hosts used to fix social media embeds.",
-        default: DEFAULT_REPLACEMENTS
     }
 });
 
@@ -154,7 +151,7 @@ function fixMessage(message: MessageObject): void {
 export default definePlugin({
     name: "FixupSocialEmbeds",
     description: "Replaces social media URL hosts with embed-friendly alternatives before sending.",
-    authors: [{ name: "mia-cx", id: 0n }],
+    authors: [{ name: "patchstep", id: 0n }],
     tags: ["Chat", "Utility"],
     dependencies: ["MessageEventsAPI"],
     settings,

@@ -1,40 +1,56 @@
-# FixupSocialEmbeds
+# Equicord Plugins
 
-An Equicord/Vencord user plugin that replaces social media URL hosts with
-embed-friendly alternatives immediately before sending or editing a message.
+A collection of Equicord/Vencord user plugins.
 
-It ships with these replacements:
+## Plugins
 
-| Input host | Output host |
+| Plugin | Description |
 | --- | --- |
-| `x.com` | `fixupx.com` |
-| `instagram.com` | `hhinstagram.com` |
+| [FixupSocialEmbeds](./fixupSocialEmbeds) | Replaces social-media URL hosts with embed-friendly alternatives before sending or editing a message. |
 
-Paths, query parameters, and fragments are preserved. Replacements only match
-the exact configured hostname, so `x.com` does not accidentally match
-`notx.com`.
+Each plugin lives in its own camelCase directory with an `index.ts` or
+`index.tsx` entry point, matching Equicord's user-plugin layout.
 
 ## Install
 
-Clone this repository into Equicord's `src/userplugins` directory:
+User plugins require an Equicord source build. If `src/userplugins` does not
+already contain anything you need to keep, clone this collection directly into
+that directory:
 
 ```sh
-git clone https://github.com/mia-cx/equicord-plugins.git \
-  src/userplugins/FixupSocialEmbeds
+cd /path/to/Equicord
+git clone https://github.com/mia-cx/equicord-plugins.git src/userplugins
+pnpm build
+pnpm inject
 ```
 
-Then rebuild Equicord and enable **FixupSocialEmbeds** in the Plugins settings.
+If you already have user plugins, clone the collection elsewhere and symlink
+only the plugins you want:
 
-## Configure
+```sh
+git clone https://github.com/mia-cx/equicord-plugins.git /path/to/equicord-plugins
+ln -s /path/to/equicord-plugins/fixupSocialEmbeds \
+  /path/to/Equicord/src/userplugins/fixupSocialEmbeds
 
-Open Equicord Settings → Plugins → FixupSocialEmbeds. You can edit, add, or
-remove as many input/output host pairs as you want.
+cd /path/to/Equicord
+pnpm build
+pnpm inject
+```
 
-For example:
+After the initial injection, rebuild and restart Discord whenever a plugin is
+added or updated. Enable installed plugins under **Equicord Settings → Plugins**.
+
+## Adding a plugin
+
+Create one top-level camelCase directory per plugin:
 
 ```text
-https://x.com/example/status/123?foo=bar
-→ https://fixupx.com/example/status/123?foo=bar
+equicord-plugins/
+├── fixupSocialEmbeds/
+│   └── index.tsx
+└── anotherPlugin/
+    └── index.ts
 ```
 
-The plugin runs on both new messages and edited messages.
+Add the plugin to the table above and keep plugin-specific documentation in
+that plugin's directory.

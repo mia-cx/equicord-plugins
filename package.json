@@ -1,15 +1,11 @@
 {
-  "name": "fixup-social-embeds",
+  "name": "equicord-plugins",
   "version": "1.0.0",
   "private": true,
-  "description": "An Equicord user plugin that rewrites social media hosts to embed-friendly alternatives.",
+  "description": "A collection of Equicord user plugins.",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/mia-cx/equicord-plugins.git"
-  },
-  "vencord": {
-    "plugin": true,
-    "userPlugin": true
   }
 }
